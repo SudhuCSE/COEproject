@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config(); 
 
 const secretKey = process.env.JWT_SECRET;
 
@@ -22,16 +22,17 @@ try {
     process.exit(1);
 }
 
-// Replace with the user ID you want to generate a token for
-const userId = 456432; // Example: Change to the ID you want
-const userPayload = payloadData.find(user => user.id === userId);
+/**
+ * Generates a JWT token for a given user ID.
+ * @param {number} userId - The user ID for which to generate a token.
+ * @returns {string} - The generated JWT token.
+ */
+const generateToken = (userId) => {
+    const userPayload = payloadData.find(user => user.id === userId);
+    if (!userPayload) {
+        throw new Error(`User with ID ${userId} not found in the payload file.`);
+    }
+    return jwt.sign(userPayload, secretKey, { expiresIn: '1h' });
+};
 
-if (!userPayload) {
-    console.error(`User with ID ${userId} not found in the payload file.`);
-    process.exit(1);
-}
-
-// Generate the token
-const token = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-console.log("Generated JWT Token:", token);
+module.exports = generateToken;
