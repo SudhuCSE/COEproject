@@ -12,15 +12,18 @@ exports.getUserById = (req, res) => {
         return res.status(400).json({ message: 'Invalid ID: ID must be a valid number.' });
     }
 
-    // A vulnerable endpoint where token isn't validated against user ID
-    const user = payloadData.find(user => user.id === parseInt(id));
+    if (parseInt(id) !== req.user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+    }
 
+    const user = payloadData.find(user => user.id === parseInt(id));
     if (user) {
         res.json(user);
     } else {
         res.status(404).json({ message: 'User not found' });
     }
 };
+
 
 // Create a new user
 // exports.createUser = (req, res) => {
@@ -44,6 +47,10 @@ exports.updateUser = (req, res) => {
         return res.status(400).json({ message: 'Invalid input: id must be a valid number.' });
     }
 
+    if (parseInt(id) !== req.user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
     if (name && typeof name !== 'string') {
         return res.status(400).json({ message: 'Invalid input: name must be a string if provided.' });
     }
@@ -57,7 +64,6 @@ exports.updateUser = (req, res) => {
         return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update only the fields provided in the request body
     const updatedUser = {
         ...payloadData[userIndex],
         ...(name && { name }),
@@ -67,6 +73,7 @@ exports.updateUser = (req, res) => {
     payloadData[userIndex] = updatedUser;
     res.status(200).json(updatedUser);
 };
+
 
 
 // // Replace user details (full update)
@@ -95,6 +102,10 @@ exports.deleteUser = (req, res) => {
         return res.status(400).json({ message: 'Invalid input: id must be a valid number.' });
     }
 
+    if (parseInt(id) !== req.user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
     const userIndex = payloadData.findIndex(user => user.id === parseInt(id));
     if (userIndex === -1) {
         return res.status(404).json({ message: 'User not found' });
@@ -103,3 +114,4 @@ exports.deleteUser = (req, res) => {
     payloadData.splice(userIndex, 1);
     res.status(200).json({ message: 'User deleted successfully' });
 };
+
